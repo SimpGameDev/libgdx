@@ -2,35 +2,36 @@ package com.example.mygame;
 
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.StringBuilder;
+
+/**
+ * Provides a typing or typewriter animation for scene2d.ui Label and TextButton.
+ * 
+ */
 
 public class TypeWriterAction extends Action {
 
     private Label label;
-    private String[] phrases;
-    private float letterDelay, phraseDelay;
-    private int phraseIndex;
-    private float letterTimeElapsed, phraseTimeElapsed;
-    private int letterIndex;
+    private StringBuilder stb;
+    private CharSequence[] texts;
+    private int textIndex, charIndex;
+    private float charInterval,charIntervalElapsed, textInterval, textIntervalElapsed;
 
-    /**
-     *
-     * @param label
-     * @param phrases Strings to display
-     * @param phraseInterval pause between phrases
-     * @param letterInterval pause between letters
-     */
-    public TypeWriterAction(Label label, String[] phrases, float phraseInterval, float letterInterval){
+   
+    public TypeWriterAction(Label label, CharSequence[] texts, float textInterval, float charInterval){
         this.label = label;
-        this.phrases = phrases;
-        this.phraseDelay = phraseInterval;
-        this.letterDelay = letterInterval;
+        this.texts = texts;
+        this.textInterval = textInterval;
+        this.charInterval = charInterval;
+        stb = label.getText();
     }
 
-    private void setPhrase(int index){
-        phraseIndex = index;
-        letterIndex = 0;
-        phraseTimeElapsed = 0f;
-        letterTimeElapsed = 0f;
+    private void setText(int index){
+        textIndex = index;
+        charIndex = 0;
+        textIntervalElapsed = 0f;
+        charIntervalElapsed = 0f;
+        stb.clear();
     }
 
     /**
@@ -41,24 +42,25 @@ public class TypeWriterAction extends Action {
      */
     @Override
     public boolean act(float delta) {
-        if(letterIndex > phrases[phraseIndex].length()){
-            if(phraseIndex >= phrases.length-1)
+        if(charIndex >= texts[textIndex].length()){
+            if(textIndex >= texts.length-1)
                 return true;
             else {
-                if(phraseTimeElapsed>=phraseDelay)
-                    setPhrase(phraseIndex+1);
+                if(textIntervalElapsed>=textInterval)
+                    setText(textIndex+1);
                 else{
-                    phraseTimeElapsed += delta;
+                    textIntervalElapsed += delta;
                     return false;
                 }
             }
         }
         else{
-            letterTimeElapsed += delta;
-            if(letterTimeElapsed >= letterDelay){
-                label.setText(phrases[phraseIndex].substring(0,letterIndex));
-                ++letterIndex;
-                letterTimeElapsed = 0f;
+            charIntervalElapsed += delta;
+            if(charIntervalElapsed >= charInterval){
+                stb.append(texts[textIndex].charAt(charIndex));
+                label.invalidate();
+                ++charIndex;
+                charIntervalElapsed = 0f;
             }
         }
         return false;
